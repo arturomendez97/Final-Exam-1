@@ -8,22 +8,66 @@ class App extends React.Component{
   constructor( props ){
     super( props );
     this.state = {
-      /*
-        Your code goes here
-      */
+      searchTerm : "",
+      errorMessage : "",
+      //Had problems with the books compile error, couldn't figure out what was wrong.
+      books : []
     }
   }
 
-  /* 
-    Your code goes here
-  */
+  searchBooks = ( event ) => {
+    event.preventDefault();
+    const searchTerm = event.currentTarget.bookName.value;
+
+    const url = `https://www.googleapis.com/books/v1/volumes?q=${searchTerm}`
+
+    const settings = {
+      method : 'GET'
+    }
+
+    fetch( url, settings)
+      .then ( response => {
+        if( response.ok ){
+          return response.json();
+        }
+        throw new Error( response.statusText );
+      })
+      .then( responseJSON => {
+        if (responseJSON.totalItems == 0){
+          this.setState({
+            errorMessage : "No results Obtained"
+          })
+        }
+        else{
+          this.setState({
+            books : responseJSON
+          })
+        }
+      })
+      .catch( err => {
+        this.setState({
+          errorMessage : err.message
+        })
+      })
+
+  }
 
   render(){
     return(
       <div>
-        {/* 
-          Your code goes here
-        */}
+
+        <div>
+          <BookForm searchBooks = {this.searchBooks}/>
+        </div>
+        <p>
+          {this.state.errorMessage}
+        </p>
+        
+        <div>
+          <Book bookData = {books}
+                key={books.totalItems}/>
+        </div>
+
       </div>
     )
   }
